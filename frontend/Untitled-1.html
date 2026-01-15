@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian Political Data Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --saffron: #FF9933;
+      --white: #FFFFFF;
+      --green: #138808;
+      --navy: #1a1f3a;
+      --charcoal: #2d3748;
+      --light-gray: #f7fafc;
+      --border-gray: #e2e8f0;
+      --text-gray: #4a5568;
+      --text-light: #718096;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, 
+        rgba(255, 153, 51, 0.08) 0%,
+        rgba(255, 255, 255, 0.95) 33%,
+        rgba(255, 255, 255, 0.95) 66%,
+        rgba(19, 136, 8, 0.08) 100%
+      );
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      color: var(--charcoal);
+    }
+
+    /* Animated background elements */
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .bg-pattern::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 30%, var(--saffron) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--green) 0%, transparent 50%),
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 2px,
+          rgba(26, 31, 58, 0.03) 2px,
+          rgba(26, 31, 58, 0.03) 4px
+        );
+      animation: subtleMove 20s ease-in-out infinite;
+    }
+
+    /* Ashoka Chakra inspired pattern */
+    .chakra-pattern {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      top: 10%;
+      right: 5%;
+      opacity: 0.06;
+      background: radial-gradient(
+        circle,
+        transparent 40%,
+        var(--navy) 40%,
+        var(--navy) 42%,
+        transparent 42%,
+        transparent 48%,
+        var(--navy) 48%,
+        var(--navy) 50%,
+        transparent 50%
+      );
+      background-size: 20px 20px;
+      border-radius: 50%;
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes subtleMove {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, -20px) scale(1.05); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Data grid overlay */
+    .data-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.04;
+      background-image: 
+        linear-gradient(var(--navy) 1px, transparent 1px),
+        linear-gradient(90deg, var(--navy) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    /* Main container */
+    .container {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* Back to home link */
+    .back-to-home {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      z-index: 10;
+    }
+
+    .back-to-home a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--navy);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(26, 31, 58, 0.1);
+    }
+
+    .back-to-home a:hover {
+      background: var(--white);
+      color: var(--saffron);
+      transform: translateX(-3px);
+    }
+
+    .back-to-home a::before {
+      content: '←';
+      font-size: 1.1rem;
+    }
+
+    /* Header section */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .header h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header .subtitle {
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      color: var(--text-gray);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* Auth card */
+    .auth-card {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 
+        0 20px 60px rgba(26, 31, 58, 0.12),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border-gray);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      margin-bottom: -2px;
+    }
+
+    .auth-tab:hover {
+      color: var(--charcoal);
+    }
+
+    .auth-tab.active {
+      color: var(--saffron);
+      border-bottom-color: var(--saffron);
+      font-weight: 600;
+    }
+
+    .auth-card h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .auth-card .card-subtitle {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Hide forms */
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    /* Form styles */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--charcoal);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 1.5px solid var(--border-gray);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--charcoal);
+      background: var(--white);
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--saffron);
+      box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-light);
+    }
+
+    /* Button */
+    .btn-login,
+    .btn-signup {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+      margin-top: 0.5rem;
+    }
+
+    .btn-login:hover,
+    .btn-signup:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    .btn-login:active,
+    .btn-signup:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(255, 153, 51, 0.3);
+    }
+
+    .btn-login:disabled,
+    .btn-signup:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Forgot password link */
+    .forgot-password {
+      text-align: center;
+      margin-top: 1.25rem;
+    }
+
+    .forgot-password a {
+      color: var(--saffron);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .forgot-password a:hover {
+      color: #ff8c1a;
+      text-decoration: underline;
+    }
+
+    /* Decorative elements */
+    .decorative-dots {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .dots-top-left {
+      top: -40px;
+      left: -40px;
+      background: radial-gradient(circle, var(--saffron) 2px, transparent 2px);
+      background-size: 12px 12px;
+    }
+
+    .dots-bottom-right {
+      bottom: -40px;
+      right: -40px;
+      background: radial-gradient(circle, var(--green) 2px, transparent 2px);
+      background-size: 12px 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .auth-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .header {
+        margin-bottom: 2rem;
+      }
+
+      .back-to-home {
+        top: 1rem;
+        left: 1rem;
+      }
+
+      .back-to-home a {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+      }
+    }
+
+    /* Switch link */
+    .switch-auth {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+
+    .switch-auth a {
+      color: var(--saffron);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .switch-auth a:hover {
+      color: #ff8c1a;
+      text-decoration: underline;
+    }
+
+    /* Success/error messages */
+    .message {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+
+    .message-success {
+      background: rgba(19, 136, 8, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(19, 136, 8, 0.2);
+    }
+
+    .message-error {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    /* OTP Input Styles */
+    .otp-container {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .otp-input {
+      width: 3rem;
+      height: 3rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      border: 2px solid var(--border-gray);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--charcoal);
+      transition: all 0.2s ease;
+    }
+
+    .otp-input:focus {
+      outline: none;
+      border-color: var(--saffron);
+      box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.1);
+    }
+
+    .otp-input:disabled {
+      background: var(--light-gray);
+      cursor: not-allowed;
+    }
+
+    .btn-send-otp {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: linear-gradient(135deg, var(--green) 0%, #0f7a06 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(19, 136, 8, 0.3);
+      margin-bottom: 1rem;
+    }
+
+    .btn-send-otp:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(19, 136, 8, 0.4);
+      background: linear-gradient(135deg, #0f7a06 0%, var(--green) 100%);
+    }
+
+    .btn-send-otp:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-verify-otp {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+      margin-top: 0.5rem;
+    }
+
+    .btn-verify-otp:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    .btn-verify-otp:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .otp-section {
+      display: none;
+    }
+
+    .otp-section.active {
+      display: block;
+    }
+
+    .phone-input-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .country-code {
+      width: 80px;
+      padding: 0.875rem 0.5rem;
+      border: 1.5px solid var(--border-gray);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--charcoal);
+      background: var(--white);
+      text-align: center;
+    }
+
+    .phone-input {
+      flex: 1;
+    }
+
+    .otp-info {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .resend-otp {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .resend-otp a {
+      color: var(--saffron);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .resend-otp a:hover {
+      color: #ff8c1a;
+      text-decoration: underline;
+    }
+
+    .resend-otp.disabled {
+      color: var(--text-light);
+    }
+
+    .resend-otp.disabled a {
+      color: var(--text-light);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Login method toggle */
+    .login-method-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      padding: 0.5rem;
+      background: var(--light-gray);
+      border-radius: 8px;
+    }
+
+    .login-method-option {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-gray);
+      background: transparent;
+      border: 2px solid transparent;
+    }
+
+    .login-method-option:hover {
+      color: var(--charcoal);
+    }
+
+    .login-method-option.active {
+      background: var(--white);
+      color: var(--saffron);
+      border-color: var(--saffron);
+      font-weight: 600;
+    }
+
+    .login-method-input {
+      display: none;
+    }
+
+    .login-method-input.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="chakra-pattern"></div>
+  <div class="data-grid"></div>
+
+  <div class="container">
+    <!-- Back to Home Link -->
+    <div class="back-to-home">
+      <a href="index.html">Back to Home</a>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>Indian Political Data Intelligence Platform</h1>
+      <p class="subtitle">Analyze. Compare. Understand Democracy Through Data.</p>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+        <div class="decorative-dots dots-top-left"></div>
+        <div class="decorative-dots dots-bottom-right"></div>
+        
+        <h2>Welcome</h2>
+        <p class="card-subtitle">Sign in or create an account to access the dashboard</p>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="signin">Sign In</button>
+          <button class="auth-tab" data-tab="signup">Sign Up</button>
+        </div>
+
+        <!-- Sign In Form -->
+        <form id="login-form" class="auth-form active">
+          <div id="signin-basic-info">
+            <!-- Login Method Toggle -->
+            <div class="login-method-toggle">
+              <div class="login-method-option active" data-method="email">
+                Email
+              </div>
+              <div class="login-method-option" data-method="phone">
+                Phone Number
+              </div>
+            </div>
+
+            <!-- Email Input -->
+            <div class="form-group login-method-input active" id="signin-email-group">
+              <label for="signin-email" class="form-label">Email</label>
+              <input
+                type="email"
+                id="signin-email"
+                name="email"
+                class="form-input"
+                placeholder="Enter your email"
+                autocomplete="email"
+              />
+            </div>
+
+            <!-- Phone Number Input -->
+            <div class="form-group login-method-input" id="signin-phone-group">
+              <label for="signin-phone" class="form-label">Phone Number</label>
+              <div class="phone-input-group">
+                <input
+                  type="text"
+                  id="signin-country-code"
+                  class="country-code"
+                  value="+91"
+                  readonly
+                />
+                <input
+                  type="tel"
+                  id="signin-phone"
+                  name="phone"
+                  class="form-input phone-input"
+                  placeholder="Enter your phone number"
+                  autocomplete="tel"
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+            </div>
+
+            <button type="button" class="btn-send-otp" id="signin-send-otp-btn">
+              Send OTP
+            </button>
+          </div>
+
+          <!-- OTP Verification Section -->
+          <div id="signin-otp-section" class="otp-section">
+            <p class="otp-info">Enter the OTP sent to <span id="signin-phone-display"></span></p>
+            <div class="otp-container">
+              <input type="text" class="otp-input" maxlength="1" data-index="0" />
+              <input type="text" class="otp-input" maxlength="1" data-index="1" />
+              <input type="text" class="otp-input" maxlength="1" data-index="2" />
+              <input type="text" class="otp-input" maxlength="1" data-index="3" />
+              <input type="text" class="otp-input" maxlength="1" data-index="4" />
+              <input type="text" class="otp-input" maxlength="1" data-index="5" />
+            </div>
+            <button type="button" class="btn-verify-otp" id="signin-verify-otp-btn">
+              Verify OTP & Sign In
+            </button>
+            <div class="resend-otp" id="signin-resend-otp">
+              <span>Didn't receive OTP? </span>
+              <a href="#" id="signin-resend-link">Resend OTP</a>
+              <span id="signin-resend-timer"></span>
+            </div>
+          </div>
+
+          <div class="forgot-password">
+            <a href="#" id="forgot-link">Forgot password?</a>
+          </div>
+        </form>
+
+        <!-- Sign Up Form -->
+        <form id="signup-form" class="auth-form">
+          <div id="signup-basic-info">
+            <div class="form-group">
+              <label for="signup-username" class="form-label">Username</label>
+              <input
+                type="text"
+                id="signup-username"
+                name="username"
+                class="form-input"
+                placeholder="Choose a username"
+                required
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="signup-email" class="form-label">Email</label>
+              <input
+                type="email"
+                id="signup-email"
+                name="email"
+                class="form-input"
+                placeholder="Enter your email"
+                required
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="signup-phone" class="form-label">Phone Number</label>
+              <div class="phone-input-group">
+                <input
+                  type="text"
+                  id="signup-country-code"
+                  class="country-code"
+                  value="+91"
+                  readonly
+                />
+                <input
+                  type="tel"
+                  id="signup-phone"
+                  name="phone"
+                  class="form-input phone-input"
+                  placeholder="Enter your phone number"
+                  required
+                  autocomplete="tel"
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-password" class="form-label">Password</label>
+              <input
+                type="password"
+                id="signup-password"
+                name="password"
+                class="form-input"
+                placeholder="Create a password"
+                required
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+              <input
+                type="password"
+                id="signup-confirm-password"
+                name="confirmPassword"
+                class="form-input"
+                placeholder="Confirm your password"
+                required
+                autocomplete="new-password"
+              />
+            </div>
+
+            <button type="button" class="btn-send-otp" id="signup-send-otp-btn">
+              Send OTP
+            </button>
+          </div>
+
+          <!-- OTP Verification Section -->
+          <div id="signup-otp-section" class="otp-section">
+            <p class="otp-info">Enter the OTP sent to <span id="signup-phone-display"></span></p>
+            <div class="otp-container">
+              <input type="text" class="otp-input" maxlength="1" data-index="0" />
+              <input type="text" class="otp-input" maxlength="1" data-index="1" />
+              <input type="text" class="otp-input" maxlength="1" data-index="2" />
+              <input type="text" class="otp-input" maxlength="1" data-index="3" />
+              <input type="text" class="otp-input" maxlength="1" data-index="4" />
+              <input type="text" class="otp-input" maxlength="1" data-index="5" />
+            </div>
+            <button type="button" class="btn-verify-otp" id="signup-verify-otp-btn">
+              Verify OTP & Sign Up
+            </button>
+            <div class="resend-otp" id="signup-resend-otp">
+              <span>Didn't receive OTP? </span>
+              <a href="#" id="signup-resend-link">Resend OTP</a>
+              <span id="signup-resend-timer"></span>
+            </div>
+          </div>
+        </form>
+      </div>
+  </div>
+
+  <script>
+    // Backend API Configuration
+    const DEMO_MODE = false; // Backend is available
+    // Automatically detect environment and use appropriate API URL
+    const getApiBaseUrl = () => {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:3000';
+      }
+      return 'https://your-backend-url.onrender.com'; // Replace with your actual backend URL
+    };
+
+    const API_CONFIG = {
+      BASE_URL: getApiBaseUrl(), // Backend server URL
+      ENDPOINTS: {
+        GENERATE_OTP: '/auth/generate-otp',
+        VERIFY_OTP: '/auth/verify-otp'
+      }
+    };
+
+    // Demo mode - Mock OTP storage
+    const mockOTPs = {};
+
+    // Generate a random 6-digit OTP
+    function generateOTP() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    // Demo mode functions
+    function demoSendOTP(type, identifier) {
+      return new Promise((resolve) => {
+        // Generate OTP
+        const otp = generateOTP();
+        const key = type === 'signup' ? identifier.phone : (identifier.type === 'email' ? identifier.value : identifier.value);
+        
+        // Store OTP (in real app, this would be sent via SMS/Email)
+        mockOTPs[key] = {
+          otp: otp,
+          expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes
+          type: type
+        };
+
+        // Show OTP in console for demo (in production, this would be sent via SMS/Email)
+        console.log(`[DEMO MODE] OTP for ${key}: ${otp}`);
+        alert(`[DEMO MODE] OTP sent: ${otp}\n\nIn production, this would be sent via SMS/Email.\n\nCheck browser console for OTP.`);
+
+        // Simulate network delay
+        setTimeout(() => {
+          resolve({
+            ok: true,
+            phone: identifier.type === 'phone' ? identifier.value : (type === 'signup' ? identifier.phone : '+91XXXXXXXXXX')
+          });
+        }, 1000);
+      });
+    }
+
+    function demoVerifyOTP(type, identifier, enteredOTP) {
+      return new Promise((resolve, reject) => {
+        const key = type === 'signup' ? identifier.phone : (identifier.type === 'email' ? identifier.value : identifier.value);
+        const storedOTP = mockOTPs[key];
+
+        // Simulate network delay
+        setTimeout(() => {
+          if (!storedOTP) {
+            reject({ ok: false, message: 'OTP not found. Please request a new OTP.' });
+            return;
+          }
+
+          if (Date.now() > storedOTP.expiresAt) {
+            delete mockOTPs[key];
+            reject({ ok: false, message: 'OTP has expired. Please request a new one.' });
+            return;
+          }
+
+          if (storedOTP.otp === enteredOTP) {
+            delete mockOTPs[key];
+            resolve({ ok: true, message: 'OTP verified successfully' });
+          } else {
+            reject({ ok: false, message: 'Invalid OTP. Please try again.' });
+          }
+        }, 800);
+      });
+    }
+
+    function demoSignup(userData) {
+      return new Promise((resolve) => {
+        // Store user in localStorage
+        const users = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+        
+        // Check if user already exists
+        const existingUser = users.find(u => u.email === userData.email || u.phone === userData.phone);
+        if (existingUser) {
+          setTimeout(() => {
+            resolve({ ok: false, message: 'User already exists with this email or phone number.' });
+          }, 500);
+          return;
+        }
+
+        // Add new user
+        const newUser = {
+          id: Date.now().toString(),
+          username: userData.username,
+          email: userData.email,
+          phone: userData.phone,
+          createdAt: new Date().toISOString()
+        };
+        users.push(newUser);
+        localStorage.setItem('demoUsers', JSON.stringify(users));
+
+        // Simulate network delay
+        setTimeout(() => {
+          resolve({
+            ok: true,
+            token: 'demo_token_' + Date.now(),
+            user: newUser,
+            redirectUrl: 'index.html' // Redirect to dashboard (adjust path as needed)
+          });
+        }, 800);
+      });
+    }
+
+    function demoSignin(identifier) {
+      return new Promise((resolve) => {
+        const users = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+        
+        // Find user by email or phone
+        const user = identifier.type === 'email' 
+          ? users.find(u => u.email === identifier.value)
+          : users.find(u => u.phone === identifier.value);
+
+        // Simulate network delay
+        setTimeout(() => {
+          if (user) {
+            resolve({
+              ok: true,
+              token: 'demo_token_' + Date.now(),
+              user: user,
+              redirectUrl: 'index.html' // Redirect to dashboard (adjust path as needed)
+            });
+          } else {
+            resolve({
+              ok: false,
+              message: 'User not found. Please sign up first.'
+            });
+          }
+        }, 800);
+      });
+    }
+
+    // OTP state management
+    let otpTimer = {
+      signin: null,
+      signup: null
+    };
+    let otpTimerInterval = {
+      signin: null,
+      signup: null
+    };
+    let otpTimeLeft = {
+      signin: 0,
+      signup: 0
+    };
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.auth-tab');
+    const forms = document.querySelectorAll('.auth-form');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.getAttribute('data-tab');
+        
+        // Update tabs
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Update forms
+        forms.forEach(f => f.classList.remove('active'));
+        document.getElementById(`${targetTab === 'signin' ? 'login' : 'signup'}-form`).classList.add('active');
+        
+        // Reset OTP sections
+        const signinBasicInfo = document.getElementById('signin-basic-info');
+        const signinOTPSection = document.getElementById('signin-otp-section');
+        const signupBasicInfo = document.getElementById('signup-basic-info');
+        const signupOTPSection = document.getElementById('signup-otp-section');
+        
+        if (targetTab === 'signin') {
+          signinBasicInfo.style.display = 'block';
+          signinOTPSection.classList.remove('active');
+          clearOTPInputs('signin-otp-section');
+          stopOTPTimer('signin');
+          
+          // Reset login method toggle to email
+          const emailOption = document.querySelector('.login-method-option[data-method="email"]');
+          const phoneOption = document.querySelector('.login-method-option[data-method="phone"]');
+          const signinEmailGroupEl = document.getElementById('signin-email-group');
+          const signinPhoneGroupEl = document.getElementById('signin-phone-group');
+          if (emailOption && phoneOption && signinEmailGroupEl && signinPhoneGroupEl) {
+            emailOption.classList.add('active');
+            phoneOption.classList.remove('active');
+            signinEmailGroupEl.classList.add('active');
+            signinPhoneGroupEl.classList.remove('active');
+            document.getElementById('signin-email').required = true;
+            document.getElementById('signin-phone').required = false;
+            document.getElementById('signin-email').value = '';
+            document.getElementById('signin-phone').value = '';
+          }
+        } else {
+          signupBasicInfo.style.display = 'block';
+          signupOTPSection.classList.remove('active');
+          clearOTPInputs('signup-otp-section');
+          stopOTPTimer('signup');
+        }
+        
+        // Clear any messages
+        const messages = document.querySelectorAll('.message');
+        messages.forEach(msg => msg.remove());
+      });
+    });
+
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const forgotLink = document.getElementById('forgot-link');
+
+    // Login method toggle handling
+    const loginMethodOptions = document.querySelectorAll('.login-method-option');
+    const signinEmailGroup = document.getElementById('signin-email-group');
+    const signinPhoneGroup = document.getElementById('signin-phone-group');
+    const signinEmailInput = document.getElementById('signin-email');
+    const signinPhoneInput = document.getElementById('signin-phone');
+
+    loginMethodOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const method = option.getAttribute('data-method');
+        
+        // Update active state
+        loginMethodOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // Show/hide appropriate input
+        if (method === 'email') {
+          signinEmailGroup.classList.add('active');
+          signinPhoneGroup.classList.remove('active');
+          signinEmailInput.required = true;
+          signinPhoneInput.required = false;
+          signinPhoneInput.value = '';
+        } else {
+          signinEmailGroup.classList.remove('active');
+          signinPhoneGroup.classList.add('active');
+          signinEmailInput.required = false;
+          signinPhoneInput.required = true;
+          signinEmailInput.value = '';
+        }
+        
+        // Clear any messages
+        const messages = loginForm.querySelectorAll('.message');
+        messages.forEach(msg => msg.remove());
+      });
+    });
+
+    // OTP Input handling
+    function setupOTPInputs(containerId) {
+      const otpInputs = document.querySelectorAll(`#${containerId} .otp-input`);
+      
+      otpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          const value = e.target.value;
+          // Only allow numbers
+          if (!/^\d*$/.test(value)) {
+            e.target.value = '';
+            return;
+          }
+          
+          // Move to next input if value entered
+          if (value && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+          }
+        });
+
+        input.addEventListener('keydown', (e) => {
+          // Handle backspace
+          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+        });
+
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const paste = e.clipboardData.getData('text').slice(0, 6);
+          if (/^\d+$/.test(paste)) {
+            paste.split('').forEach((char, i) => {
+              if (otpInputs[i]) {
+                otpInputs[i].value = char;
+              }
+            });
+            otpInputs[Math.min(paste.length - 1, otpInputs.length - 1)].focus();
+          }
+        });
+      });
+    }
+
+    function getOTPValue(containerId) {
+      const otpInputs = document.querySelectorAll(`#${containerId} .otp-input`);
+      return Array.from(otpInputs).map(input => input.value).join('');
+    }
+
+    function clearOTPInputs(containerId) {
+      const otpInputs = document.querySelectorAll(`#${containerId} .otp-input`);
+      otpInputs.forEach(input => {
+        input.value = '';
+        input.disabled = false;
+      });
+      if (otpInputs[0]) otpInputs[0].focus();
+    }
+
+    function startOTPTimer(type) {
+      otpTimeLeft[type] = 60; // 60 seconds
+      const timerElement = document.getElementById(`${type}-resend-timer`);
+      const resendContainer = document.getElementById(`${type}-resend-otp`);
+      const resendLink = document.getElementById(`${type}-resend-link`);
+
+      if (otpTimerInterval[type]) {
+        clearInterval(otpTimerInterval[type]);
+      }
+
+      resendContainer.classList.add('disabled');
+      resendLink.style.pointerEvents = 'none';
+
+      otpTimerInterval[type] = setInterval(() => {
+        otpTimeLeft[type]--;
+        if (timerElement) {
+          timerElement.textContent = ` (Resend in ${otpTimeLeft[type]}s)`;
+        }
+
+        if (otpTimeLeft[type] <= 0) {
+          clearInterval(otpTimerInterval[type]);
+          resendContainer.classList.remove('disabled');
+          resendLink.style.pointerEvents = 'auto';
+          if (timerElement) {
+            timerElement.textContent = '';
+          }
+        }
+      }, 1000);
+    }
+
+    function stopOTPTimer(type) {
+      if (otpTimerInterval[type]) {
+        clearInterval(otpTimerInterval[type]);
+        otpTimerInterval[type] = null;
+      }
+      const timerElement = document.getElementById(`${type}-resend-timer`);
+      if (timerElement) {
+        timerElement.textContent = '';
+      }
+    }
+
+    // Setup OTP inputs
+    setupOTPInputs('signin-otp-section');
+    setupOTPInputs('signup-otp-section');
+
+    // Helper function to show messages
+    function showMessage(message, type = 'error', form) {
+      const targetForm = form || loginForm;
+      // Remove any existing messages
+      const existingMessage = targetForm.querySelector('.message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message message-${type}`;
+      messageDiv.textContent = message;
+      targetForm.insertBefore(messageDiv, targetForm.firstChild);
+
+      // Auto-remove success messages after 5 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          messageDiv.remove();
+        }, 5000);
+      }
+    }
+
+    // Helper function to reset button state
+    function resetButton(btn, text) {
+      btn.disabled = false;
+      btn.textContent = text;
+    }
+
+    // Send OTP function
+    async function sendOTP(type) {
+      const sendOTPBtn = document.getElementById(`${type}-send-otp-btn`);
+      const basicInfoSection = document.getElementById(`${type}-basic-info`);
+      const otpSection = document.getElementById(`${type}-otp-section`);
+      const phoneDisplay = document.getElementById(`${type}-phone-display`);
+      let phone = '';
+      let countryCode = '';
+      let identifier = null; // username or phone
+
+      // Validation for signup
+      if (type === 'signup') {
+        const phoneInput = document.getElementById(`${type}-phone`);
+        countryCode = document.getElementById(`${type}-country-code`).value;
+        phone = phoneInput.value.trim();
+
+        if (!phone || phone.length !== 10 || !/^\d+$/.test(phone)) {
+          showMessage('Please enter a valid 10-digit phone number.', 'error', signupForm);
+          phoneInput.focus();
+          return;
+        }
+
+        const username = document.getElementById('signup-username').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+        if (!username || !email || !password || !confirmPassword) {
+          showMessage('Please fill in all fields.', 'error', signupForm);
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showMessage('Passwords do not match.', 'error', signupForm);
+          return;
+        }
+
+        if (password.length < 6) {
+          showMessage('Password must be at least 6 characters long.', 'error', signupForm);
+          return;
+        }
+      }
+
+      // Validation for signin - check which method is selected
+      if (type === 'signin') {
+        const activeMethod = document.querySelector('.login-method-option.active').getAttribute('data-method');
+        
+        if (activeMethod === 'email') {
+          const email = document.getElementById('signin-email').value.trim();
+          if (!email) {
+            showMessage('Please enter your email.', 'error', loginForm);
+            document.getElementById('signin-email').focus();
+            return;
+          }
+          // Basic email validation
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            showMessage('Please enter a valid email address.', 'error', loginForm);
+            document.getElementById('signin-email').focus();
+            return;
+          }
+          identifier = { type: 'email', value: email };
+          // Phone will be fetched from backend based on email
+          phone = null;
+        } else {
+          // Phone number method
+          const phoneInput = document.getElementById(`${type}-phone`);
+          countryCode = document.getElementById(`${type}-country-code`).value;
+          phone = phoneInput.value.trim();
+
+          if (!phone || phone.length !== 10 || !/^\d+$/.test(phone)) {
+            showMessage('Please enter a valid 10-digit phone number.', 'error', loginForm);
+            phoneInput.focus();
+            return;
+          }
+          identifier = { type: 'phone', value: `${countryCode}${phone}` };
+        }
+      }
+
+      // Disable button
+      sendOTPBtn.disabled = true;
+      sendOTPBtn.textContent = 'Sending OTP...';
+
+      try {
+        let data;
+        
+        if (DEMO_MODE) {
+          // Use demo mode
+          const demoIdentifier = type === 'signup' 
+            ? { phone: `${countryCode}${phone}` }
+            : identifier;
+          
+          data = await demoSendOTP(type, demoIdentifier);
+          
+          if (data.ok) {
+            // Show OTP section
+            basicInfoSection.style.display = 'none';
+            otpSection.classList.add('active');
+            
+            // Display phone number
+            const displayPhone = data.phone || (type === 'signup' ? `${countryCode}${phone}` : (identifier.type === 'phone' ? identifier.value : 'your registered phone'));
+            phoneDisplay.textContent = displayPhone || 'your registered phone';
+            
+            clearOTPInputs(`${type}-otp-section`);
+            startOTPTimer(type);
+            showMessage('OTP sent successfully! (Demo Mode)', 'success', type === 'signin' ? loginForm : signupForm);
+          } else {
+            showMessage(data.message || 'Failed to send OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+            resetButton(sendOTPBtn, 'Send OTP');
+          }
+        } else {
+          // Use real backend - backend expects { phoneNumber }
+          let phoneNumberToSend;
+          if (type === 'signup') {
+            phoneNumberToSend = `${countryCode}${phone}`;
+          } else {
+            if (identifier.type === 'email') {
+              showMessage('Backend requires phone number for login. Please use phone number option.', 'error', loginForm);
+              resetButton(sendOTPBtn, 'Send OTP');
+              return;
+            } else {
+              phoneNumberToSend = identifier.value;
+            }
+          }
+
+          const requestBody = {
+            phoneNumber: phoneNumberToSend
+          };
+
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.GENERATE_OTP}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+          });
+
+          data = await response.json();
+
+          if (response.ok && data.success) {
+            // Show OTP section
+            basicInfoSection.style.display = 'none';
+            otpSection.classList.add('active');
+            
+            phoneDisplay.textContent = phoneNumberToSend;
+            
+            // Store phone number for verification
+            sessionStorage.setItem(`${type}_phoneNumber`, phoneNumberToSend);
+            
+            // Show OTP if provided by backend (for development)
+            if (data.otp) {
+              alert(`[DEV MODE] OTP: ${data.otp}\n\nIn production, this would be sent via SMS.`);
+            }
+            
+            clearOTPInputs(`${type}-otp-section`);
+            startOTPTimer(type);
+            showMessage('OTP sent successfully! Check your phone.', 'success', type === 'signin' ? loginForm : signupForm);
+          } else {
+            showMessage(data.message || data.error || 'Failed to send OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+            resetButton(sendOTPBtn, 'Send OTP');
+          }
+        }
+      } catch (error) {
+        console.error('Send OTP error:', error);
+        if (DEMO_MODE) {
+          showMessage('Demo mode error. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+        } else {
+          showMessage('Unable to connect to server. Please try again later.', 'error', type === 'signin' ? loginForm : signupForm);
+        }
+        resetButton(sendOTPBtn, 'Send OTP');
+      }
+    }
+
+    // Verify OTP function
+    async function verifyOTP(type) {
+      const otp = getOTPValue(`${type}-otp-section`);
+      const verifyOTPBtn = document.getElementById(`${type}-verify-otp-btn`);
+      const otpInputs = document.querySelectorAll(`#${type}-otp-section .otp-input`);
+
+      // Validation
+      if (otp.length !== 6) {
+        showMessage('Please enter the complete 6-digit OTP.', 'error', type === 'signin' ? loginForm : signupForm);
+        return;
+      }
+
+      // Disable inputs and button
+      otpInputs.forEach(input => input.disabled = true);
+      verifyOTPBtn.disabled = true;
+      verifyOTPBtn.textContent = 'Verifying...';
+
+      try {
+        let data;
+        
+        if (DEMO_MODE) {
+          // Use demo mode
+          let identifier;
+          
+          if (type === 'signup') {
+            const phoneInput = document.getElementById(`${type}-phone`);
+            const countryCode = document.getElementById(`${type}-country-code`).value;
+            const phone = phoneInput.value.trim();
+            identifier = { phone: `${countryCode}${phone}` };
+          } else {
+            const activeMethod = document.querySelector('.login-method-option.active').getAttribute('data-method');
+            if (activeMethod === 'email') {
+              const email = document.getElementById('signin-email').value.trim();
+              identifier = { type: 'email', value: email };
+            } else {
+              const phoneInput = document.getElementById(`${type}-phone`);
+              const countryCode = document.getElementById(`${type}-country-code`).value;
+              const phone = phoneInput.value.trim();
+              identifier = { type: 'phone', value: `${countryCode}${phone}` };
+            }
+          }
+
+          try {
+            data = await demoVerifyOTP(type, identifier, otp);
+            
+            if (data.ok) {
+              if (type === 'signup') {
+                const phoneInput = document.getElementById(`${type}-phone`);
+                const countryCode = document.getElementById(`${type}-country-code`).value;
+                const phone = phoneInput.value.trim();
+                await completeSignup(`${countryCode}${phone}`);
+              } else {
+                await completeSignin();
+              }
+            } else {
+              showMessage(data.message || 'Invalid OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+              clearOTPInputs(`${type}-otp-section`);
+              resetButton(verifyOTPBtn, type === 'signup' ? 'Verify OTP & Sign Up' : 'Verify OTP & Sign In');
+              otpInputs.forEach(input => input.disabled = false);
+            }
+          } catch (error) {
+            showMessage(error.message || 'Invalid OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+            clearOTPInputs(`${type}-otp-section`);
+            resetButton(verifyOTPBtn, type === 'signup' ? 'Verify OTP & Sign Up' : 'Verify OTP & Sign In');
+            otpInputs.forEach(input => input.disabled = false);
+          }
+        } else {
+          // Use real backend
+          // Get phone number from session storage
+          const phoneNumber = sessionStorage.getItem(`${type}_phoneNumber`);
+          if (!phoneNumber) {
+            showMessage('Phone number not found. Please request OTP again.', 'error', type === 'signin' ? loginForm : signupForm);
+            resetButton(verifyOTPBtn, type === 'signup' ? 'Verify OTP & Sign Up' : 'Verify OTP & Sign In');
+            otpInputs.forEach(input => input.disabled = false);
+            return;
+          }
+
+          const requestBody = {
+            phoneNumber: phoneNumber,
+            otp: otp
+          };
+
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VERIFY_OTP}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+          });
+
+          data = await response.json();
+
+          if (response.ok && data.success) {
+            // Store token from backend
+            if (data.token) {
+              localStorage.setItem('authToken', data.token);
+              localStorage.setItem('phoneNumber', phoneNumber);
+              localStorage.setItem('isLoggedIn', 'true');
+            }
+            
+            // Clear session storage
+            sessionStorage.removeItem(`${type}_phoneNumber`);
+            
+            if (type === 'signup') {
+              showMessage('Account verified successfully! Redirecting to dashboard...', 'success', signupForm);
+            } else {
+              showMessage('Sign in successful! Redirecting to dashboard...', 'success', loginForm);
+            }
+            
+            setTimeout(() => {
+              window.location.href = 'dashbord.html';
+            }, 1500);
+          } else {
+            showMessage(data.message || 'Invalid OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+            clearOTPInputs(`${type}-otp-section`);
+            resetButton(verifyOTPBtn, type === 'signup' ? 'Verify OTP & Sign Up' : 'Verify OTP & Sign In');
+            otpInputs.forEach(input => input.disabled = false);
+          }
+        }
+      } catch (error) {
+        console.error('Verify OTP error:', error);
+        if (DEMO_MODE) {
+          showMessage('Demo mode error. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+        } else {
+          showMessage('Unable to connect to server. Please try again later.', 'error', type === 'signin' ? loginForm : signupForm);
+        }
+        resetButton(verifyOTPBtn, type === 'signup' ? 'Verify OTP & Sign Up' : 'Verify OTP & Sign In');
+        otpInputs.forEach(input => input.disabled = false);
+      }
+    }
+
+    // Complete signup after OTP verification
+    async function completeSignup(phone) {
+      const username = document.getElementById('signup-username').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+
+      try {
+        let data;
+        
+        if (DEMO_MODE) {
+          // Use demo mode
+          data = await demoSignup({ username, email, password, phone });
+        } else {
+          // Use real backend
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SIGNUP}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              email,
+              password,
+              phone
+            })
+          });
+
+          data = await response.json();
+        }
+
+        if (data.ok) {
+          showMessage('Account created successfully! Redirecting to dashboard...', 'success', signupForm);
+          
+          if (data.token) {
+            localStorage.setItem('authToken', data.token);
+          }
+          
+          if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('loggedInUser', data.user.username || data.user.email);
+            localStorage.setItem('isLoggedIn', 'true');
+          }
+
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || 'index.html';
+          }, 1500);
+        } else {
+          showMessage(data.message || 'Sign up failed. Please try again.', 'error', signupForm);
+          const verifyOTPBtn = document.getElementById('signup-verify-otp-btn');
+          resetButton(verifyOTPBtn, 'Verify OTP & Sign Up');
+          const otpInputs = document.querySelectorAll('#signup-otp-section .otp-input');
+          otpInputs.forEach(input => input.disabled = false);
+        }
+      } catch (error) {
+        console.error('Sign up error:', error);
+        if (DEMO_MODE) {
+          showMessage('Demo mode error. Please try again.', 'error', signupForm);
+        } else {
+          showMessage('Unable to connect to server. Please try again later.', 'error', signupForm);
+        }
+        const verifyOTPBtn = document.getElementById('signup-verify-otp-btn');
+        resetButton(verifyOTPBtn, 'Verify OTP & Sign Up');
+        const otpInputs = document.querySelectorAll('#signup-otp-section .otp-input');
+        otpInputs.forEach(input => input.disabled = false);
+      }
+    }
+
+    // Complete signin after OTP verification
+    async function completeSignin() {
+      // Determine which method was used (email or phone)
+      const activeMethod = document.querySelector('.login-method-option.active').getAttribute('data-method');
+      let identifier;
+
+      if (activeMethod === 'email') {
+        const email = document.getElementById('signin-email').value.trim();
+        identifier = { type: 'email', value: email };
+      } else {
+        const phoneInput = document.getElementById('signin-phone');
+        const countryCode = document.getElementById('signin-country-code').value;
+        const phone = phoneInput.value.trim();
+        identifier = { type: 'phone', value: `${countryCode}${phone}` };
+      }
+
+      try {
+        let data;
+        
+        if (DEMO_MODE) {
+          // Use demo mode
+          data = await demoSignin(identifier);
+        } else {
+          // Use real backend
+          const requestBody = {};
+          if (identifier.type === 'email') {
+            requestBody.email = identifier.value;
+          } else {
+            requestBody.phone = identifier.value;
+          }
+
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+          });
+
+          data = await response.json();
+        }
+
+        if (data.ok) {
+          showMessage('Sign in successful! Redirecting to dashboard...', 'success', loginForm);
+          
+          if (data.token) {
+            localStorage.setItem('authToken', data.token);
+          }
+          
+          if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('loggedInUser', data.user.username || data.user.email);
+            localStorage.setItem('isLoggedIn', 'true');
+          }
+
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || 'index.html';
+          }, 1500);
+        } else {
+          showMessage(data.message || 'Sign in failed. Please try again.', 'error', loginForm);
+          const verifyOTPBtn = document.getElementById('signin-verify-otp-btn');
+          resetButton(verifyOTPBtn, 'Verify OTP & Sign In');
+          const otpInputs = document.querySelectorAll('#signin-otp-section .otp-input');
+          otpInputs.forEach(input => input.disabled = false);
+        }
+      } catch (error) {
+        console.error('Sign in error:', error);
+        if (DEMO_MODE) {
+          showMessage('Demo mode error. Please try again.', 'error', loginForm);
+        } else {
+          showMessage('Unable to connect to server. Please try again later.', 'error', loginForm);
+        }
+        const verifyOTPBtn = document.getElementById('signin-verify-otp-btn');
+        resetButton(verifyOTPBtn, 'Verify OTP & Sign In');
+        const otpInputs = document.querySelectorAll('#signin-otp-section .otp-input');
+        otpInputs.forEach(input => input.disabled = false);
+      }
+    }
+
+    // Resend OTP function
+    async function resendOTP(type) {
+      if (otpTimeLeft[type] > 0) {
+        return; // Timer still running
+      }
+
+      // Get phone number from session storage
+      const phoneNumber = sessionStorage.getItem(`${type}_phoneNumber`);
+      if (!phoneNumber) {
+        showMessage('Please request OTP first.', 'error', type === 'signin' ? loginForm : signupForm);
+        return;
+      }
+
+      try {
+        let data;
+        
+        if (DEMO_MODE) {
+          // Use demo mode
+          const demoIdentifier = type === 'signup' 
+            ? { phone: requestBody.phone }
+            : (requestBody.email ? { type: 'email', value: requestBody.email } : { type: 'phone', value: requestBody.phone });
+          
+          data = await demoSendOTP(type, demoIdentifier);
+          
+          if (data.ok) {
+            clearOTPInputs(`${type}-otp-section`);
+            startOTPTimer(type);
+            showMessage('OTP resent successfully! (Demo Mode)', 'success', type === 'signin' ? loginForm : signupForm);
+          } else {
+            showMessage(data.message || 'Failed to resend OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+          }
+        } else {
+          // Use real backend - resend uses same endpoint as generate-otp
+          const phoneNumber = sessionStorage.getItem(`${type}_phoneNumber`);
+          if (!phoneNumber) {
+            showMessage('Please request OTP first.', 'error', type === 'signin' ? loginForm : signupForm);
+            return;
+          }
+
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.GENERATE_OTP}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phoneNumber: phoneNumber })
+          });
+
+          data = await response.json();
+
+          if (response.ok && data.success) {
+            clearOTPInputs(`${type}-otp-section`);
+            startOTPTimer(type);
+            if (data.otp) {
+              alert(`[DEV MODE] New OTP: ${data.otp}\n\nIn production, this would be sent via SMS.`);
+            }
+            showMessage('OTP resent successfully!', 'success', type === 'signin' ? loginForm : signupForm);
+          } else {
+            showMessage(data.message || data.error || 'Failed to resend OTP. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+          }
+        }
+      } catch (error) {
+        console.error('Resend OTP error:', error);
+        if (DEMO_MODE) {
+          showMessage('Demo mode error. Please try again.', 'error', type === 'signin' ? loginForm : signupForm);
+        } else {
+          showMessage('Unable to connect to server. Please try again later.', 'error', type === 'signin' ? loginForm : signupForm);
+        }
+      }
+    }
+
+    // Event listeners for OTP buttons
+    document.getElementById('signup-send-otp-btn').addEventListener('click', () => sendOTP('signup'));
+    document.getElementById('signin-send-otp-btn').addEventListener('click', () => sendOTP('signin'));
+    document.getElementById('signup-verify-otp-btn').addEventListener('click', () => verifyOTP('signup'));
+    document.getElementById('signin-verify-otp-btn').addEventListener('click', () => verifyOTP('signin'));
+    document.getElementById('signup-resend-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      resendOTP('signup');
+    });
+    document.getElementById('signin-resend-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      resendOTP('signin');
+    });
+
+    // Handle Sign In form submission (prevent default, OTP is handled separately)
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // OTP flow is handled by sendOTP and verifyOTP functions
+    });
+
+    // Handle Sign Up form submission (prevent default, OTP is handled separately)
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // OTP flow is handled by sendOTP and verifyOTP functions
+    });
+
+    // Handle forgot password link
+    forgotLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value.trim();
+      
+      if (!email) {
+        showMessage('Please enter your email address first.', 'error', loginForm);
+        document.getElementById('signin-email').focus();
+        return;
+      }
+
+      try {
+        // Make API call to backend for password reset
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.FORGOT_PASSWORD}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(data.message || `Password reset link will be sent to: ${email}`, 'success', loginForm);
+        } else {
+          showMessage(data.message || 'Failed to send password reset link. Please try again.', 'error', loginForm);
+        }
+      } catch (error) {
+        console.error('Forgot password error:', error);
+        showMessage('Unable to connect to server. Please try again later.', 'error', loginForm);
+      }
+    });
+
+    // Add subtle animation on input focus
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'scale(1.01)';
+        this.parentElement.style.transition = 'transform 0.2s ease';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'scale(1)';
+      });
+    });
+
+    // Phone number input validation (only numbers, max 10 digits)
+    const phoneInputs = document.querySelectorAll('input[type="tel"]');
+    phoneInputs.forEach(input => {
+      input.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+      });
+    });
+  </script>
+</body>
+</html>

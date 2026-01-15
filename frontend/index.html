@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian Political Data Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --saffron: #FF9933;
+      --white: #FFFFFF;
+      --green: #138808;
+      --navy: #1a1f3a;
+      --charcoal: #2d3748;
+      --light-gray: #f7fafc;
+      --border-gray: #e2e8f0;
+      --text-gray: #4a5568;
+      --text-light: #718096;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, 
+        rgba(255, 153, 51, 0.08) 0%,
+        rgba(255, 255, 255, 0.95) 33%,
+        rgba(255, 255, 255, 0.95) 66%,
+        rgba(19, 136, 8, 0.08) 100%
+      );
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      color: var(--charcoal);
+    }
+
+    /* Animated background elements */
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .bg-pattern::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 30%, var(--saffron) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--green) 0%, transparent 50%),
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 2px,
+          rgba(26, 31, 58, 0.03) 2px,
+          rgba(26, 31, 58, 0.03) 4px
+        );
+      animation: subtleMove 20s ease-in-out infinite;
+    }
+
+    /* Ashoka Chakra inspired pattern */
+    .chakra-pattern {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      top: 10%;
+      right: 5%;
+      opacity: 0.06;
+      background: radial-gradient(
+        circle,
+        transparent 40%,
+        var(--navy) 40%,
+        var(--navy) 42%,
+        transparent 42%,
+        transparent 48%,
+        var(--navy) 48%,
+        var(--navy) 50%,
+        transparent 50%
+      );
+      background-size: 20px 20px;
+      border-radius: 50%;
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes subtleMove {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, -20px) scale(1.05); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Data grid overlay */
+    .data-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.04;
+      background-image: 
+        linear-gradient(var(--navy) 1px, transparent 1px),
+        linear-gradient(90deg, var(--navy) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    /* Navigation */
+    nav {
+      position: relative;
+      z-index: 10;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(26, 31, 58, 0.08);
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo::before {
+      content: '📊';
+      font-size: 1.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-gray);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--saffron);
+    }
+
+    .btn-nav {
+      padding: 0.625rem 1.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    }
+
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    /* Main container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 6rem 0 4rem;
+      text-align: center;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .hero .gradient-text {
+      background: linear-gradient(135deg, var(--saffron) 0%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .subtitle {
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--text-gray);
+      font-weight: 400;
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 4rem;
+    }
+
+    .btn-primary {
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, var(--saffron) 0%, #ff8c1a 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 153, 51, 0.4);
+      background: linear-gradient(135deg, #ff8c1a 0%, var(--saffron) 100%);
+    }
+
+    .btn-secondary {
+      padding: 1rem 2.5rem;
+      background: var(--white);
+      color: var(--navy);
+      border: 2px solid var(--border-gray);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--saffron);
+      color: var(--saffron);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 153, 51, 0.2);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 4rem 0;
+      animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--text-gray);
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 
+        0 10px 40px rgba(26, 31, 58, 0.08),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 
+        0 20px 60px rgba(26, 31, 58, 0.12),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: var(--text-gray);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    /* Stats Section */
+    .stats {
+      padding: 4rem 0;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      margin: 4rem 0;
+      animation: fadeIn 1s ease-out 0.6s both;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .stat-item {
+      padding: 1.5rem;
+    }
+
+    .stat-number {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--saffron) 0%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-gray);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    /* CTA Section */
+    .cta {
+      padding: 5rem 0;
+      text-align: center;
+      animation: fadeIn 1s ease-out 0.9s both;
+    }
+
+    .cta-content {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      box-shadow: 
+        0 20px 60px rgba(26, 31, 58, 0.12),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+    }
+
+    .cta h2 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 1rem;
+    }
+
+    .cta p {
+      font-size: 1.2rem;
+      color: var(--text-gray);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-gray);
+      margin-top: 4rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .nav-links {
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .hero {
+        padding: 3rem 0 2rem;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cta-content {
+        padding: 3rem 1.5rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 0 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Discussions Section */
+    .discussions-section {
+      padding: 4rem 0;
+      animation: fadeIn 1s ease-out 0.9s both;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border-gray);
+      padding-bottom: 1rem;
+    }
+
+    .tab-button {
+      padding: 0.75rem 2rem;
+      background: transparent;
+      color: var(--text-gray);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .tab-button:hover {
+      color: var(--saffron);
+      background: rgba(255, 153, 51, 0.1);
+    }
+
+    .tab-button.active {
+      color: var(--saffron);
+      background: rgba(255, 153, 51, 0.1);
+    }
+
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1rem;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--green) 100%);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .discussions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .discussion-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 
+        0 10px 40px rgba(26, 31, 58, 0.08),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .discussion-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+    }
+
+    .discussion-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 
+        0 20px 60px rgba(26, 31, 58, 0.12),
+        0 0 0 1px rgba(26, 31, 58, 0.05);
+    }
+
+    .discussion-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .discussion-card p {
+      color: var(--text-gray);
+      line-height: 1.6;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .discussion-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-gray);
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .discussion-author {
+      font-weight: 500;
+      color: var(--text-gray);
+    }
+
+    .discussion-date {
+      color: var(--text-light);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-gray);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--navy);
+    }
+
+    .empty-state p {
+      color: var(--text-light);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-gray);
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .discussions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .tab-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="chakra-pattern"></div>
+  <div class="data-grid"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">Indian Political Data Intelligence</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="Untitled-1.html" class="btn-nav">Sign In</a>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>
+        Analyze. Compare. Understand<br />
+        <span class="gradient-text">Democracy Through Data</span>
+      </h1>
+      <p class="subtitle">
+        Comprehensive political intelligence platform providing real-time insights, 
+        comparative analysis, and data-driven understanding of Indian politics.
+      </p>
+      <div class="hero-buttons">
+        <a href="Untitled-1.html" class="btn-primary">Get Started</a>
+        <a href="#features" class="btn-secondary">Learn More</a>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">50K+</div>
+          <div class="stat-label">Data Points</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Constituencies</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100+</div>
+          <div class="stat-label">Political Parties</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Real-time Updates</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <h2 class="section-title">Powerful Features</h2>
+      <p class="section-subtitle">
+        Everything you need to understand and analyze Indian political landscape
+      </p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">📈</span>
+          <h3>Real-time Analytics</h3>
+          <p>
+            Get instant access to the latest political data, election results, 
+            and voting patterns updated in real-time.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔍</span>
+          <h3>Deep Insights</h3>
+          <p>
+            Comprehensive analysis of political trends, demographic patterns, 
+            and electoral behavior across all states and regions.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📊</span>
+          <h3>Comparative Analysis</h3>
+          <p>
+            Compare political parties, candidates, and constituencies side-by-side 
+            with advanced visualization tools.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🗺️</span>
+          <h3>Geographic Mapping</h3>
+          <p>
+            Interactive maps showing political affiliations, voting patterns, 
+            and electoral outcomes across India.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <h3>Mobile Responsive</h3>
+          <p>
+            Access all features on any device. Our platform works seamlessly 
+            on desktop, tablet, and mobile.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔒</span>
+          <h3>Secure & Private</h3>
+          <p>
+            Your data is protected with enterprise-grade security. 
+            We prioritize your privacy and data integrity.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Discussions Section -->
+    <section class="discussions-section" id="discussions">
+      <h2 class="section-title">Community Discussions</h2>
+      <p class="section-subtitle">
+        Join the conversation and share your insights on Indian politics
+      </p>
+      
+      <div class="tabs">
+        <button class="tab-button active" data-tab="feeds">Feeds</button>
+        <button class="tab-button" data-tab="my-posts">My Posts</button>
+      </div>
+
+      <div id="discussions-container">
+        <div class="loading">Loading discussions...</div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="cta-content">
+        <h2>Ready to Explore?</h2>
+        <p>
+          Join thousands of researchers, journalists, and political enthusiasts 
+          who use our platform to understand Indian democracy better.
+        </p>
+        <a href="Untitled-1.html" class="btn-primary">Sign In to Dashboard</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2024 Indian Political Data Intelligence Platform. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Automatically detect environment and use appropriate API URL
+    const getApiBaseUrl = () => {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:3000';
+      }
+      return 'https://your-backend-url.onrender.com'; // Replace with your actual backend URL
+    };
+    const API_BASE_URL = getApiBaseUrl();
+    let currentTab = 'feeds';
+
+    // Tab switching functionality
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        // Update active tab
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Update current tab
+        currentTab = button.getAttribute('data-tab');
+        
+        // Load discussions for the selected tab
+        loadDiscussions();
+      });
+    });
+
+    // Format date
+    function formatDate(dateString) {
+      if (!dateString) return 'Recently';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+      
+      if (diffInSeconds < 60) return 'Just now';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Render discussions
+    function renderDiscussions(discussions) {
+      const container = document.getElementById('discussions-container');
+      
+      if (!discussions || discussions.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <h3>No discussions yet</h3>
+            <p>${currentTab === 'my-posts' ? 'You haven\'t created any discussions yet.' : 'Be the first to start a discussion!'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="discussions-grid">
+          ${discussions.map(discussion => `
+            <div class="discussion-card">
+              <h3>${escapeHtml(discussion.title)}</h3>
+              <p>${escapeHtml(discussion.content)}</p>
+              <div class="discussion-meta">
+                <span class="discussion-author">📱 ${escapeHtml(discussion.author)}</span>
+                <span class="discussion-date">${formatDate(discussion.createdAt)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Load discussions based on current tab
+    async function loadDiscussions() {
+      const container = document.getElementById('discussions-container');
+      container.innerHTML = '<div class="loading">Loading discussions...</div>';
+
+      try {
+        let url = `${API_BASE_URL}/discussion/all`;
+        
+        if (currentTab === 'my-posts') {
+          const token = localStorage.getItem('authToken');
+          if (!token) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">🔒</div>
+                <h3>Authentication Required</h3>
+                <p>Please sign in to view your posts.</p>
+                <a href="Untitled-1.html" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Sign In</a>
+              </div>
+            `;
+            return;
+          }
+          url = `${API_BASE_URL}/discussion/my-posts`;
+        }
+
+        const headers = {};
+        if (currentTab === 'my-posts') {
+          const token = localStorage.getItem('authToken');
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: headers
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">🔒</div>
+                <h3>Authentication Required</h3>
+                <p>Please sign in to view your posts.</p>
+                <a href="Untitled-1.html" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Sign In</a>
+              </div>
+            `;
+            return;
+          }
+          throw new Error('Failed to load discussions');
+        }
+
+        const discussions = await response.json();
+        renderDiscussions(discussions);
+      } catch (error) {
+        console.error('Error loading discussions:', error);
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <h3>Error Loading Discussions</h3>
+            <p>${error.message}. Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Load discussions on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDiscussions();
+    });
+  </script>
+</body>
+</html>
