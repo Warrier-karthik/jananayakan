@@ -52,10 +52,9 @@ const corsOptions = {
     optionsSuccessStatus: 204
 };
 
-app.use(cors(corsOptions));
+// Apply CORS middleware - this handles all OPTIONS requests automatically
 
-// Handle preflight requests explicitly for all routes
-app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 // Serve static files from frontend directory
 app.use(express.static(path.join(__dirname, "frontend")));
