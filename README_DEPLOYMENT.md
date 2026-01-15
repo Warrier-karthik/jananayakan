@@ -27,7 +27,7 @@ In Render dashboard, add these environment variables:
 After deployment, you'll get a URL like: `https://jana-nayakan-backend.onrender.com`
 
 Update these files:
-- `frontend/dashbord.html` - Replace `'https://your-backend-url.onrender.com'` with your actual URL
+- `frontend/dashbord.html` - Backend URL: `https://jananayakan-1.onrender.com`
 - `frontend/index.html` - Same
 - `frontend/Untitled-1.html` - Same
 
@@ -59,7 +59,7 @@ You can deploy frontend separately on Vercel/Netlify, or serve it from the same 
 
 After deployment, test your API:
 ```bash
-curl https://your-backend-url.onrender.com/discussion/all
+curl https://jananayakan-1.onrender.com/discussion/all
 ```
 
 Should return JSON data if working correctly.

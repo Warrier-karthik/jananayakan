@@ -44,7 +44,7 @@ curl -H "Origin: https://your-frontend-url.com" \
      -H "Access-Control-Request-Method: POST" \
      -H "Access-Control-Request-Headers: Content-Type" \
      -X OPTIONS \
-     https://your-backend-url.onrender.com/discussion/all \
+     https://jananayakan-1.onrender.com/discussion/all \
      -v
 ```
 

@@ -157,7 +157,7 @@ BASE_URL: 'http://localhost:3000'
 
 To:
 ```javascript
-BASE_URL: 'https://your-backend-url.onrender.com'
+BASE_URL: 'https://jananayakan-1.onrender.com'
 ```
 
 ### Option B: Environment Detection (Recommended)
@@ -172,7 +172,7 @@ Update the API_CONFIG in each frontend file:
 const API_CONFIG = {
   BASE_URL: window.location.hostname === 'localhost' 
     ? 'http://localhost:3000' 
-    : 'https://your-backend-url.onrender.com',
+    : 'https://jananayakan-1.onrender.com',
   // ... rest of config
 };
 ```
@@ -183,7 +183,7 @@ const API_CONFIG = {
 
 1. **Check Backend Health**
    ```bash
-   curl https://your-backend-url.onrender.com/discussion/all
+   curl https://jananayakan-1.onrender.com/discussion/all
    ```
 
 2. **Test Frontend**
