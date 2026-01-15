@@ -1,14 +1,25 @@
 const mongoose = require("mongoose");
 
-const otpSchema = new mongoose.Schema({
-    otp: {
-        type: String,
-        required: true
+// OTP schema now stores OTPs per phone number with timestamps
+const otpSchema = new mongoose.Schema(
+    {
+        phoneNumber: {
+            type: String,
+            required: true,
+            index: true
+        },
+        otp: {
+            type: String,
+            required: true
+        },
+        expiresAt: {
+            type: Date,
+            default: () => Date.now() + 2 * 60 * 1000 // OTP expires in 2 minutes
+        }
     },
-    expiresAt: {
-        type: Date,
-        default: () => Date.now() + 2 * 60 * 1000 // OTP expires in 5 minutes
+    {
+        timestamps: true
     }
-    
-})
+);
+
 module.exports = mongoose.model("OTP", otpSchema);

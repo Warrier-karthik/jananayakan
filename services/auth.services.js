@@ -3,52 +3,81 @@ const crypto = require("crypto");
 const smsService = require("./sms.service.js");
 const OTP = require("../models/otpModel.js");
 const userService = require("./user.services.js");
+
+// Generate OTP for a given phone number
 exports.generateOTP = async (phoneNumber) => {
     try {
-        // Check MongoDB connection state
         const mongoose = require("mongoose");
         if (mongoose.connection.readyState !== 1) {
             throw new Error("MongoDB connection not ready. Please try again.");
         }
 
+        if (!phoneNumber) {
+            throw new Error("Phone number is required to generate OTP");
+        }
+
         const otp = crypto.randomInt(100000, 999999).toString();
         const hashedOTP = await bcrypt.hash(otp, 10);
         console.log(`Generated OTP for ${phoneNumber}: ${otp}`);
-        
-        const otpEntry = new OTP({ otp: hashedOTP });
-        
+
+        // Remove old OTPs for this phone number
+        await OTP.deleteMany({ phoneNumber });
+
+        const otpEntry = new OTP({
+            phoneNumber,
+            otp: hashedOTP
+        });
+
         // Save with timeout handling
         await Promise.race([
             otpEntry.save(),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
                 setTimeout(() => reject(new Error("OTP save operation timed out")), 15000)
             )
         ]);
 
-        return {hashedOTP};
+        // Return both hashed and plain OTP (plain OTP is only for dev / SMS)
+        return { otp, hashedOTP };
     } catch (error) {
         console.error("Error generating OTP:", error);
         throw error;
     }
-}
-exports.verifyOTP = async (otp) => {
-    const otpEntries = await OTP.find({});
-    if (otpEntries.length === 0) {
-        return false;
+};
+
+// Verify OTP for a given phone number
+exports.verifyOTP = async (phoneNumber, otp) => {
+    try {
+        if (!phoneNumber || !otp) {
+            throw new Error("Phone number and OTP are required");
+        }
+
+        const otpEntry = await OTP.findOne({ phoneNumber }).sort({ createdAt: -1 });
+        if (!otpEntry) {
+            throw new Error("OTP not found. Please request a new OTP.");
+        }
+
+        if (otpEntry.expiresAt < Date.now()) {
+            await OTP.deleteMany({ phoneNumber });
+            throw new Error("OTP has expired. Please request a new OTP.");
+        }
+
+        const isMatch = await bcrypt.compare(otp, otpEntry.otp);
+        if (!isMatch) {
+            throw new Error("Invalid OTP");
+        }
+
+        // OTP is valid, remove all OTPs for this phone number
+        await OTP.deleteMany({ phoneNumber });
+        return true;
+    } catch (error) {
+        console.error("Error verifying OTP:", error);
+        throw error;
     }
-    const latestOTPEntry = otpEntries[otpEntries.length - 1];
-    if (latestOTPEntry.expiresAt < Date.now()) {
-        throw new Error("OTP has expired");
-    }
-    const isMatch = await bcrypt.compare(otp, latestOTPEntry.otp);
-    if (!isMatch) {
-        throw new Error("Invalid OTP");
-    }
-    await OTP.deleteMany({});
-    return true;
-}
+};
+
+// Check if a user exists for a given phone number
 exports.verifyUser = async (phoneNumber) => {
-    const user = await userService.getUserByPhoneNumber(phoneNumber);
-    console.log(user);
-    return !!user;
-}
+    const users = await userService.getUserByPhoneNumber(phoneNumber);
+    console.log(users);
+    return Array.isArray(users) && users.length > 0;
+};

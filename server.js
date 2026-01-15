@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://karthikwarrier103_db_user:IyqMsTjF9eVUPN4g@jana-nayakan.4owtetz.mongodb.net/hackathonDB?retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb://localhost:27017/hackathonDB";
 
 // Connect to MongoDB with improved connection options
 const mongooseOptions = {
@@ -132,7 +132,7 @@ const startServer = async () => {
         console.warn("   0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting");
     }
     
-    app.listen(PORT, (error) => {
+    app.listen(3000, (error) => {
         if (error) {
             console.error("❌ Server error:", error);
         } else {
